@@ -1,0 +1,19 @@
+--extra-index-url https://download.pytorch.org/whl/cu117
+torch==2.0.0
+torchvision==0.15.0
+timm
+transformers
+scikit-learn
+numpy
+pandas
+tqdm
+matplotlib
+opencv-python
+Pillow
+xformers==0.0.18
+omegaconf
+torchmetrics==0.10.3
+fvcore
+iopath
+submitit
+# cuML must be installed via conda, not pip. See: https://rapids.ai/start.html
