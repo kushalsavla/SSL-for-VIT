@@ -20,4 +20,4 @@ python3 --version
 pip list | grep dinov2
 
 # Run training script
-python train_vit.py
+python -u train_vit.py
