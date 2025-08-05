@@ -16,4 +16,7 @@ torchmetrics==0.10.3
 fvcore
 iopath
 submitit
+tensorboard
+tensorboardX
+munkres
 # cuML must be installed via conda, not pip. See: https://rapids.ai/start.html

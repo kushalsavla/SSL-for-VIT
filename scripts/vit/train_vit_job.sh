@@ -21,7 +21,7 @@ echo "🧠 Allocated GPU(s): $CUDA_VISIBLE_DEVICES"
 source /work/dlclarge2/savlak-sslViT/miniconda3/etc/profile.d/conda.sh
 # If current environment is 'base', activate 'rl_project' (which has all dependencies)
 if [[ "$CONDA_DEFAULT_ENV" == "base" ]]; then
-    conda activate rl_project
+conda activate rl_project
     echo "Switched to conda environment: rl_project"
 else
     echo "Using current conda environment: $CONDA_DEFAULT_ENV"
