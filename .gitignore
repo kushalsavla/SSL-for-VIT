@@ -89,7 +89,8 @@ outputs/
 *.log
 
 # External repositories (cloned separately)
-external/
+external/*
+!external/README.md
 
 # Large model files (exclude to avoid pushing large binary files)
 models/*.pth

@@ -38,6 +38,13 @@ pip install -r requirements.txt
 
 ## 📚 **External Dependencies**
 
+First, create the external directory for external repositories:
+
+```bash
+# Create external directory
+mkdir -p external
+```
+
 ### **1. iBOT Repository**
 The iBOT implementation requires the official iBOT repository.
 
