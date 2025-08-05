@@ -10,12 +10,12 @@
 #SBATCH --cpus-per-task=4
 
 # ----------------------------------------
-# ✅ Environment Setup
+#  Environment Setup
 # ----------------------------------------
 
-echo "⏱️ Job started on: $(date)"
-echo "📍 Running on node: $(hostname)"
-echo "🧠 Allocated GPU(s): $CUDA_VISIBLE_DEVICES"
+echo " Job started on: $(date)"
+echo " Running on node: $(hostname)"
+echo " Allocated GPU(s): $CUDA_VISIBLE_DEVICES"
 
 # Load local conda setup (using friend's environment)
 source /work/dlclarge2/dragojla-workspace/miniconda3/etc/profile.d/conda.sh
@@ -25,7 +25,7 @@ conda activate projectenv
 echo "Activated conda environment: projectenv"
 
 # Optional: verify environment
-echo "🐍 Python path: $(which python)"
+echo " Python path: $(which python)"
 python --version
 pip list | grep dinov2
 
@@ -33,14 +33,14 @@ echo "Current working directory: $(pwd)"
 ls -l
 
 # ----------------------------------------
-# ✅ DINO Fine-tuning
+#  DINO Fine-tuning
 # ----------------------------------------
 
 export CUDA_LAUNCH_BLOCKING=1
 
-echo "🚀 Launching DINO Fine-tuning..."
-echo "📁 Data path: ./data/cifar10_splits/"
-echo "🤖 Model path: ./dino_vit_cifar10-200.pth"
+echo " Launching DINO Fine-tuning..."
+echo " Data path: ./data/cifar10_splits/"
+echo " Model path: ./dino_vit_cifar10-200.pth"
 
 # Run DINO fine-tuning
 python -u dino_finetune.py \
@@ -54,6 +54,6 @@ python -u dino_finetune.py \
     --weight_decay 1e-4 \
     --num_workers 4
 
-echo "✅ DINO fine-tuning complete at: $(date)"
+echo " DINO fine-tuning complete at: $(date)"
 
-echo "🏁 DINO fine-tuning run complete at: $(date)"
+echo " DINO fine-tuning run complete at: $(date)"

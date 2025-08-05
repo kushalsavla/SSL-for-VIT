@@ -10,12 +10,12 @@
 #SBATCH --cpus-per-task=4
 
 # ----------------------------------------
-# ✅ Environment Setup
+#  Environment Setup
 # ----------------------------------------
 
-echo "⏱️ Job started on: $(date)"
-echo "📍 Running on node: $(hostname)"
-echo "🧠 Allocated GPU(s): $CUDA_VISIBLE_DEVICES"
+echo " Job started on: $(date)"
+echo " Running on node: $(hostname)"
+echo " Allocated GPU(s): $CUDA_VISIBLE_DEVICES"
 
 # Load local conda setup
 source /work/dlclarge2/dragojla-workspace/miniconda3/etc/profile.d/conda.sh
@@ -28,7 +28,7 @@ else
 fi
 
 # Optional: verify environment
-echo "🐍 Python path: $(which python)"
+echo " Python path: $(which python)"
 python --version
 pip list | grep dinov2
 
@@ -36,11 +36,11 @@ echo "Current working directory: $(pwd)"
 ls -l
 
 # ----------------------------------------
-# ✅ Run Baselines
+#  Run Baselines
 # ----------------------------------------
 
 export CUDA_LAUNCH_BLOCKING=1
 
-echo "🚀 Classification"
+echo " Classification"
 python -u classification.py 
-echo "✅ Complete at: $(date)"
+echo " Complete at: $(date)"
