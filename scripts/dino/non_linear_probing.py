@@ -68,42 +68,7 @@ class MLPProbe(nn.Module):
         return self.classifier(x)
 
 def load_pretrained_model(model_path, device):
-    # """Load the SSL-pretrained model and freeze it."""
-    # print("Loading pretrained model...")
-
-    # # Create the same ViT-Small backbone used in training
-    # backbone = timm.create_model('vit_small_patch16_224', patch_size=4, num_classes=0, img_size=32)
-    # print("✅ Created ViT-Small model with patch_size=4 and img_size=32")
-
-    # if os.path.exists(model_path):
-    #     checkpoint = torch.load(model_path, map_location=device)
-
-    #     # If keys start with "backbone.", strip them off
-    #     # Handle checkpoint that includes both backbone and head
-    #     if "backbone.backbone.patch_embed.proj.weight" in checkpoint:
-    #         # It's the full DinoModel (with backbone + head)
-    #         new_state_dict = {}
-    #         for k, v in checkpoint.items():
-    #             if k.startswith("backbone."):
-    #                 new_key = k[len("backbone."):].replace("backbone.", "")  # e.g., backbone.backbone.foo -> foo
-    #                 new_state_dict[new_key] = v
-    #         backbone.load_state_dict(new_state_dict, strict=False)
-    #         print(f"✅ Loaded backbone weights from DinoModel checkpoint: {model_path}")
-    #     else:
-    #         # Try loading directly
-    #         backbone.load_state_dict(checkpoint, strict=False)
-    #         print(f"✅ Loaded model weights directly from: {model_path}")
-
-    # else:
-    #     print(f"⚠️  Model path not found: {model_path}, using random weights")
-
-    # # Freeze the backbone
-    # backbone.to(device)
-    # backbone.eval()
-    # for param in backbone.parameters():
-    #     param.requires_grad = False
-
-    # return backbone
+    
     """Load the DINO-pretrained model."""
     print(f"Loading DINO pretrained model from {model_path}")
     
