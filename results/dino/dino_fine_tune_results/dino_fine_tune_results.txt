@@ -1,0 +1,28 @@
+DINO FINE-TUNING RESULTS
+==================================================
+Best Validation Accuracy: 85.10%
+Test Accuracy: 84.69%
+Training Time: 7586.41 seconds
+Training Epochs: 100
+Backbone LR: 5e-05
+Classifier LR: 0.0005
+Weight Decay: 0.0001
+Best Model Path: ./dino_fine_tune_results/best_dino_fine_tuned_model.pth
+
+Test Set Classification Report:
+              precision    recall  f1-score   support
+
+    airplane     0.8494    0.8460    0.8477      1000
+  automobile     0.9158    0.9240    0.9199      1000
+        bird     0.8432    0.7960    0.8189      1000
+         cat     0.7116    0.6910    0.7012      1000
+        deer     0.8424    0.8230    0.8326      1000
+         dog     0.7591    0.7910    0.7747      1000
+        frog     0.8649    0.9090    0.8864      1000
+       horse     0.8810    0.8590    0.8699      1000
+        ship     0.9044    0.9180    0.9112      1000
+       truck     0.8941    0.9120    0.9030      1000
+
+    accuracy                         0.8469     10000
+   macro avg     0.8466    0.8469    0.8465     10000
+weighted avg     0.8466    0.8469    0.8465     10000

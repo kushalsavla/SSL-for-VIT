@@ -1,0 +1,28 @@
+NON-LINEAR PROBING RESULTS
+==================================================
+Best Validation Accuracy: 37.12%
+Test Accuracy: 37.59%
+Training Time: 3.46 seconds
+Feature Dimension: 384
+Number of Classes: 10
+Training Epochs: 100
+Learning Rate: 0.0005
+MLP Architecture: [512, 256]
+
+Test Set Classification Report:
+              precision    recall  f1-score   support
+
+    airplane     0.4723    0.4610    0.4666      1000
+  automobile     0.3848    0.4310    0.4066      1000
+        bird     0.3176    0.2090    0.2521      1000
+         cat     0.2494    0.2020    0.2232      1000
+        deer     0.3860    0.2930    0.3331      1000
+         dog     0.2960    0.2850    0.2904      1000
+        frog     0.3535    0.5140    0.4189      1000
+       horse     0.3968    0.3670    0.3813      1000
+        ship     0.4683    0.5680    0.5133      1000
+       truck     0.3824    0.4290    0.4043      1000
+
+    accuracy                         0.3759     10000
+   macro avg     0.3707    0.3759    0.3690     10000
+weighted avg     0.3707    0.3759    0.3690     10000
