@@ -1,0 +1,28 @@
+LINEAR PROBING RESULTS
+==================================================
+Best Validation Accuracy: 0.7024
+Test Accuracy: 0.6963
+Training Time: 0.44 seconds
+Feature Dimension: 384
+Number of Classes: 10
+Training Epochs: 100
+Learning Rate: 0.001
+Weight Decay: 0.0001
+
+Test Set Classification Report:
+              precision    recall  f1-score   support
+
+    airplane     0.7133    0.7140    0.7136      1000
+  automobile     0.7732    0.7740    0.7736      1000
+        bird     0.6461    0.5970    0.6206      1000
+         cat     0.4971    0.5130    0.5049      1000
+        deer     0.6677    0.6490    0.6582      1000
+         dog     0.5953    0.6060    0.6006      1000
+        frog     0.7590    0.7810    0.7698      1000
+       horse     0.7577    0.7380    0.7477      1000
+        ship     0.8046    0.8030    0.8038      1000
+       truck     0.7498    0.7880    0.7684      1000
+
+    accuracy                         0.6963     10000
+   macro avg     0.6964    0.6963    0.6961     10000
+weighted avg     0.6964    0.6963    0.6961     10000

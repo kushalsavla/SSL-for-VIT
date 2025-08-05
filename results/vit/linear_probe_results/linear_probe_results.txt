@@ -1,0 +1,26 @@
+LINEAR PROBING RESULTS (Supervised ViT)
+==================================================
+Best Validation Accuracy: 37.32%
+Test Accuracy: 37.04%
+Training Time: 1233.23 seconds
+Training Epochs: 100
+Learning Rate: 0.001
+Weight Decay: 0.0001
+
+Test Set Classification Report:
+              precision    recall  f1-score   support
+
+    airplane       0.42      0.52      0.47      1000
+  automobile       0.35      0.45      0.39      1000
+        bird       0.40      0.16      0.22      1000
+         cat       0.23      0.19      0.21      1000
+        deer       0.36      0.31      0.33      1000
+         dog       0.31      0.25      0.28      1000
+        frog       0.36      0.53      0.43      1000
+       horse       0.36      0.42      0.39      1000
+        ship       0.47      0.56      0.51      1000
+       truck       0.41      0.33      0.36      1000
+
+    accuracy                           0.37     10000
+   macro avg       0.37      0.37      0.36     10000
+weighted avg       0.37      0.37      0.36     10000

@@ -1,0 +1,55 @@
+FINAL TEST RESULTS ON UNSEEN DATA
+==================================================
+
+VIT RESULTS:
+Accuracy: 8.07%
+Correct: 807/10000
+Test Time: 29.57 seconds
+Throughput: 338.1 images/second
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    airplane      0.057     0.007     0.012      1000
+  automobile      0.080     0.274     0.124      1000
+        bird      0.058     0.192     0.089      1000
+         cat      0.125     0.001     0.002      1000
+        deer      0.233     0.010     0.019      1000
+         dog      0.090     0.158     0.115      1000
+        frog      0.085     0.030     0.044      1000
+       horse      0.282     0.022     0.041      1000
+        ship      0.123     0.091     0.105      1000
+       truck      0.128     0.022     0.038      1000
+
+    accuracy                          0.081     10000
+   macro avg      0.126     0.081     0.059     10000
+weighted avg      0.126     0.081     0.059     10000
+
+--------------------------------------------------
+
+IBOT RESULTS:
+Accuracy: 71.11%
+Correct: 7111/10000
+Test Time: 9.34 seconds
+Throughput: 1071.2 images/second
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    airplane      0.721     0.731     0.726      1000
+  automobile      0.768     0.794     0.781      1000
+        bird      0.665     0.626     0.645      1000
+         cat      0.547     0.522     0.534      1000
+        deer      0.693     0.647     0.669      1000
+         dog      0.608     0.632     0.620      1000
+        frog      0.754     0.821     0.786      1000
+       horse      0.764     0.746     0.755      1000
+        ship      0.812     0.817     0.815      1000
+       truck      0.767     0.775     0.771      1000
+
+    accuracy                          0.711     10000
+   macro avg      0.710     0.711     0.710     10000
+weighted avg      0.710     0.711     0.710     10000
+
+--------------------------------------------------
+

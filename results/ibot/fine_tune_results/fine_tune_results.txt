@@ -1,0 +1,28 @@
+FINE-TUNING RESULTS
+==================================================
+Best Validation Accuracy: 71.84%
+Test Accuracy: 71.11%
+Training Time: 6059.78 seconds
+Training Epochs: 100
+Backbone LR: 5e-05
+Classifier LR: 0.0005
+Weight Decay: 0.0001
+Best Model Path: ./fine_tune_results/best_fine_tuned_model.pth
+
+Test Set Classification Report:
+              precision    recall  f1-score   support
+
+    airplane     0.7209    0.7310    0.7259      1000
+  automobile     0.7679    0.7940    0.7807      1000
+        bird     0.6645    0.6260    0.6447      1000
+         cat     0.5466    0.5220    0.5340      1000
+        deer     0.6935    0.6470    0.6694      1000
+         dog     0.6083    0.6320    0.6199      1000
+        frog     0.7539    0.8210    0.7860      1000
+       horse     0.7636    0.7460    0.7547      1000
+        ship     0.8121    0.8170    0.8146      1000
+       truck     0.7666    0.7750    0.7708      1000
+
+    accuracy                         0.7111     10000
+   macro avg     0.7098    0.7111    0.7101     10000
+weighted avg     0.7098    0.7111    0.7101     10000

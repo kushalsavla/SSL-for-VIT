@@ -1,0 +1,28 @@
+NON-LINEAR PROBING RESULTS (Supervised ViT)
+==================================================
+Best Validation Accuracy: 39.42%
+Test Accuracy: 36.92%
+Training Time: 2591.53 seconds
+Training Epochs: 200
+Learning Rate: 0.001
+Weight Decay: 0.0001
+Dropout: 0.2
+Hidden Dimensions: [512, 256]
+
+Test Set Classification Report:
+              precision    recall  f1-score   support
+
+    airplane       0.45      0.46      0.46      1000
+  automobile       0.39      0.42      0.41      1000
+        bird       0.30      0.27      0.29      1000
+         cat       0.27      0.23      0.25      1000
+        deer       0.33      0.34      0.33      1000
+         dog       0.28      0.29      0.29      1000
+        frog       0.37      0.44      0.40      1000
+       horse       0.37      0.35      0.36      1000
+        ship       0.51      0.51      0.51      1000
+       truck       0.38      0.37      0.38      1000
+
+    accuracy                           0.37     10000
+   macro avg       0.37      0.37      0.37     10000
+weighted avg       0.37      0.37      0.37     10000
