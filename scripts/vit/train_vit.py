@@ -15,6 +15,12 @@ import argparse
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))  # for models
 sys.path.append("/work/dlclarge2/savlak-sslViT/dinov2")  # for custom dinov2 code
 
+# Import vision transformer from external DINO v2 repository
+# The vision_transformer.py is located in external/dino/dinov2/models/vision_transformer.py
+# This avoids duplication and ensures we use the official DINO v2 implementation
+# Navigation: external/dino/ -> dinov2/ -> models/ -> vision_transformer.py
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'external', 'dino', 'dinov2'))
 from models.vision_transformer import vit_small
 
 # --------- Config ---------

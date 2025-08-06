@@ -5,6 +5,10 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 from torchvision import transforms
 from torchvision.transforms import ToPILImage
+# Import vision transformer from external DINO v2 repository
+# The vision_transformer.py is located in external/dino/dinov2/models/vision_transformer.py
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'external', 'dino', 'dinov2'))
 from models.vision_transformer import vit_small
 from methods.dino import DINOLoss
 

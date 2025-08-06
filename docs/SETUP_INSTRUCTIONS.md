@@ -82,6 +82,11 @@ cd ../..
 # In scripts/dino/dino_fine_tune.py
 import sys
 sys.path.append('external/dino')
+# Import vision transformer from external DINO v2 repository
+# The vision_transformer.py is located in external/dino/dinov2/models/vision_transformer.py
+# Navigation: external/dino/ -> dinov2/ -> models/ -> vision_transformer.py
+import sys
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'external', 'dino', 'dinov2'))
 from models.vision_transformer import vit_small
 ```
 

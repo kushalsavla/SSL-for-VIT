@@ -9,9 +9,14 @@ This directory is for external repositories that need to be cloned separately.
 git clone https://github.com/bytedance/ibot.git external/ibot
 ```
 
-### 2. DINO Repository
+### 2. DINO V2 Repository
 ```bash
-git clone https://github.com/facebookresearch/dino.git external/dino
+git clone https://github.com/facebookresearch/dinov2.git external/dino
+```
+
+### 3. MAE Repository
+```Bash
+git clone https://github.com/facebookresearch/mae.git external/mae
 ```
 
 ## Why External?

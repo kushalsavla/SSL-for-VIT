@@ -10,8 +10,8 @@ Run the following commands to set up external dependencies:
 # Clone iBOT repository
 git clone https://github.com/bytedance/ibot.git ibot
 
-# Clone DINO repository  
-git clone https://github.com/facebookresearch/dino.git dino
+# Clone DINO v2 repository  
+git clone https://github.com/facebookresearch/dinov2.git dino
 ```
 
 ## Structure After Setup
@@ -19,7 +19,7 @@ git clone https://github.com/facebookresearch/dino.git dino
 ```
 external/
 ├── ibot/          # iBOT SSL implementation
-├── dino/          # DINO SSL implementation
+├── dino/          # DINO v2 SSL implementation (dinov2/)
 └── README.md      # This file
 ```
 

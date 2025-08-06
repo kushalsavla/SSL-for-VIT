@@ -114,7 +114,7 @@ SSL-for-VIT/
 ├── data/                         # CIFAR-10 dataset and splits
 ├── external/                     # External repositories (not in this repo)
 │   ├── ibot/                    # Official iBOT repository (cloned separately)
-│   └── dino/                    # Official DINO repository (cloned separately)
+│   └── dino/                    # Official DINO v2 repository (cloned separately)
 ├── outputs/                      # SLURM job outputs (not pushed to GitHub)
 ├── requirements.txt              # Python dependencies
 └── README.md                     # This file
