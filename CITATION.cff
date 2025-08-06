@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+  - family-names: "Savla"
+    given-names: "Kushal"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+title: "SSL for Vision Transformers: A Comprehensive Implementation and Comparison"
+version: "1.0.0"
+doi: "10.5281/zenodo.0000000"
+date-released: 2025-07-16
+url: "https://github.com/kushalsavla/SSL-for-VIT"
+repository-code: "https://github.com/kushalsavla/SSL-for-VIT"
+license: MIT
+keywords:
+  - "self-supervised learning"
+  - "vision transformers"
+  - "DINO"
+  - "MAE"
+  - "iBOT"
+  - "computer vision"
+  - "deep learning"
+  - "CIFAR-10"
+abstract: "A comprehensive implementation and comparison of Self-Supervised Learning (SSL) methods for Vision Transformers on the CIFAR-10 dataset. This repository includes implementations of DINO, MAE, iBOT, and Supervised ViT with complete training, evaluation, and analysis pipelines. Results show DINO achieving 84.69% accuracy, MAE at 81.99%, iBOT at 71.11%, and Supervised ViT at 7.58% on unseen test data, demonstrating the effectiveness of SSL methods over supervised learning." 

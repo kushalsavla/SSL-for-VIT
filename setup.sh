@@ -5,7 +5,7 @@
 
 set -e  # Exit on any error
 
-echo "🚀 Setting up SSL for Vision Transformers (ViT) project..."
+echo "Setting up SSL for Vision Transformers (ViT) project..."
 echo "=================================================="
 
 # Colors for output
@@ -270,14 +270,14 @@ echo ""
 echo "   # iBOT SSL"
 echo "   sbatch scripts/ibot/run_improved_pipeline.sh"
 echo ""
-echo "📚 Documentation:"
+echo "Documentation:"
 echo "- README.md: Complete project documentation"
 echo "- results/final_evaluation/: Final results and graphs"
 echo "- results/qualitative_analysis/: Qualitative analysis results"
 echo ""
-echo "🔧 External repositories:"
+echo "External repositories:"
 echo "- iBOT: external/ibot/"
 echo "- DINO v2: external/dino/"
 echo "- MAE: external/mae/"
 echo ""
-print_success "Happy training! 🚀" 
+print_success "Setup completed successfully!" 

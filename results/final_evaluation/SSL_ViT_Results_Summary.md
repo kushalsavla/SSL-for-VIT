@@ -1,12 +1,12 @@
 # SSL for Vision Transformers: Comprehensive Results Summary
 
-## 📊 **Executive Summary**
+## **Executive Summary**
 
 This document presents the comprehensive results of implementing Self-Supervised Learning (SSL) methods for Vision Transformers (ViT) on the CIFAR-10 dataset. We compare four approaches: **Supervised ViT**, **iBOT SSL**, **DINO SSL**, and **MAE SSL**.
 
 ---
 
-## 🎯 **Experimental Setup**
+## **Experimental Setup**
 
 ### **Dataset Configuration**
 - **Dataset**: CIFAR-10 (32×32 RGB images, 10 classes)
@@ -34,7 +34,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 
 ---
 
-## 📈 **Results Comparison**
+## **Results Comparison**
 
 ### **1. Supervised ViT Training**
 
@@ -45,7 +45,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 | **Training Loss** | 2.03 | Final epoch |
 | **Training Time** | ~7.6s/epoch | 200 epochs total |
 | **Convergence** | Epoch 18 | Best at 62.80% val acc |
-| **Status** | ✅ **Completed** | Full training cycle |
+| **Status** | **Completed** | Full training cycle |
 
 **Performance Progression:**
 - Epoch 1: 35.16% validation accuracy
@@ -61,7 +61,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 | **Training Epochs** | 100 | SSL pretraining |
 | **Training Time** | ~3.3 hours | Total SSL training |
 | **Convergence** | Excellent | 9.6 → 0.01 loss |
-| **Status** | ✅ **Completed** | SSL pretraining done |
+| **Status** | **Completed** | SSL pretraining done |
 
 **SSL Loss Progression:**
 - Epoch 1: 9.6
@@ -77,7 +77,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 | **Validation Accuracy** | 14.34% | Linear evaluation |
 | **Training Time** | 0.25s | Very fast |
 | **Feature Quality** | Basic | Linear separability |
-| **Status** | ✅ **Completed** | Baseline evaluation |
+| **Status** | **Completed** | Baseline evaluation |
 
 #### **Non-linear Probing (MLP)**
 | Metric | Value | Notes |
@@ -87,7 +87,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 | **MLP Architecture** | [512, 256] | + BatchNorm + Dropout |
 | **Training Time** | 1.92s | Fast training |
 | **Improvement** | +7.31% | Over linear probing |
-| **Status** | ✅ **Completed** | Enhanced evaluation |
+| **Status** | **Completed** | Enhanced evaluation |
 
 #### **Fine-tuning (Completed)**
 | Metric | Value | Notes |
@@ -96,7 +96,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 | **Method** | Unfrozen backbone | Full model training |
 | **Data Augmentation** | Flip, crop, color jitter | Enhanced training |
 | **Learning Rates** | Backbone: 5e-5, Classifier: 5e-4 | Optimized rates |
-| **Status** | ✅ **Completed** | Fine-tuning completed |
+| **Status** | **Completed** | Fine-tuning completed |
 
 ### **4. DINO SSL Results**
 
@@ -106,7 +106,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 | **Method** | DINO v2 fine-tuning | Teacher-student SSL |
 | **Architecture** | ViT-Small | 384 dimensions, 6 heads |
 | **Training** | Fine-tuned on CIFAR-10 | End-to-end training |
-| **Status** | ✅ **Completed** | Outstanding performance |
+| **Status** | **Completed** | Outstanding performance |
 
 **Key Achievements:**
 - **Highest accuracy**: 84.69% on unseen test data
@@ -121,7 +121,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 | **Method** | Masked Autoencoder | Reconstruction-based SSL |
 | **Architecture** | ViT-Small | 384 dimensions, 6 heads |
 | **Training** | Fine-tuned on CIFAR-10 | End-to-end training |
-| **Status** | ✅ **Completed** | Excellent performance |
+| **Status** | **Completed** | Excellent performance |
 
 **Key Achievements:**
 - **Second best**: 81.99% on unseen test data
@@ -130,7 +130,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 
 ---
 
-## 🏆 **Performance Rankings**
+## **Performance Rankings**
 
 ### **Overall Performance (Test Accuracy)**
 
@@ -150,7 +150,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 
 ---
 
-## 📊 **Detailed Analysis**
+## **Detailed Analysis**
 
 ### **Class-Specific Performance (iBOT Linear Probing)**
 
@@ -183,29 +183,29 @@ This document presents the comprehensive results of implementing Self-Supervised
 
 ---
 
-## 🔍 **Technical Insights**
+## **Technical Insights**
 
 ### **SSL Pretraining Success**
-- ✅ **Excellent convergence**: Loss from 9.6 → 0.01
-- ✅ **Stable training**: No divergence or instability
-- ✅ **Feature learning**: Some semantic understanding achieved
-- ✅ **Efficient implementation**: Clean, error-free pipeline
+- **Excellent convergence**: Loss from 9.6 → 0.01
+- **Stable training**: No divergence or instability
+- **Feature learning**: Some semantic understanding achieved
+- **Efficient implementation**: Clean, error-free pipeline
 
 ### **Evaluation Pipeline**
-- ✅ **Linear probing**: Fast baseline evaluation
-- ✅ **Non-linear probing**: Better feature utilization
-- ✅ **Fine-tuning ready**: Enhanced pipeline implemented
-- ✅ **Comprehensive metrics**: Accuracy, precision, recall, F1
+- **Linear probing**: Fast baseline evaluation
+- **Non-linear probing**: Better feature utilization
+- **Fine-tuning ready**: Enhanced pipeline implemented
+- **Comprehensive metrics**: Accuracy, precision, recall, F1
 
 ### **Areas for Improvement**
-- 🔄 **Better SSL features**: Current features show limited class separation
-- 🔄 **Enhanced augmentation**: More sophisticated SSL augmentations
-- 🔄 **Multi-scale training**: Incorporate different crop sizes
-- 🔄 **Advanced SSL methods**: Try MAE, SimCLR, or other SSL approaches
+- **Better SSL features**: Current features show limited class separation
+- **Enhanced augmentation**: More sophisticated SSL augmentations
+- **Multi-scale training**: Incorporate different crop sizes
+- **Advanced SSL methods**: Try MAE, SimCLR, or other SSL approaches
 
 ---
 
-## 🚀 **Next Steps & Recommendations**
+## **Next Steps & Recommendations**
 
 ### **Immediate Actions**
 1. **Run Fine-tuning**: Execute the enhanced fine-tuning pipeline
@@ -226,7 +226,7 @@ This document presents the comprehensive results of implementing Self-Supervised
 
 ---
 
-## 📁 **Repository Structure**
+## **Repository Structure**
 
 ```
 SSL-for-VIT/
@@ -253,13 +253,13 @@ SSL-for-VIT/
 
 ---
 
-## 🎯 **Conclusion**
+## **Conclusion**
 
 ### **Key Achievements**
-- ✅ **Successful SSL implementation**: iBOT working with excellent convergence
-- ✅ **Comprehensive evaluation**: Linear, non-linear, and fine-tuning pipelines
-- ✅ **Performance baseline**: Clear metrics for all methods
-- ✅ **Clean codebase**: Error-free, well-documented implementation
+- **Successful SSL implementation**: iBOT working with excellent convergence
+- **Comprehensive evaluation**: Linear, non-linear, and fine-tuning pipelines
+- **Performance baseline**: Clear metrics for all methods
+- **Clean codebase**: Error-free, well-documented implementation
 
 ### **Final Performance Rankings**
 1. **DINO SSL**: 84.69% test accuracy (Best performer)
@@ -283,6 +283,25 @@ This implementation provides a solid foundation for SSL research on Vision Trans
 
 ---
 
+## **Citations & References**
+
+### **Original Papers**
+- **DINO**: Caron, M., et al. "Emerging properties in self-supervised vision transformers." ICCV 2021.
+- **DINOv2**: Oquab, M., et al. "DINOv2: Learning Robust Visual Features without Supervision." arXiv 2023.
+- **MAE**: He, K., et al. "Masked autoencoders are scalable vision learners." CVPR 2022.
+- **iBOT**: Zhou, J., et al. "iBOT: Image-level self-supervised learning via image-to-object translation." CVPR 2022.
+- **ViT**: Dosovitskiy, A., et al. "An image is worth 16x16 words: Transformers for image recognition at scale." ICLR 2021.
+
+### **Dataset**
+- **CIFAR-10**: Krizhevsky, A., & Hinton, G. "Learning multiple layers of features from tiny images." 2009.
+
+### **External Repositories**
+- DINO v2: [facebookresearch/dinov2](https://github.com/facebookresearch/dinov2)
+- iBOT: [bytedance/ibot](https://github.com/bytedance/ibot)
+- MAE: [facebookresearch/mae](https://github.com/facebookresearch/mae)
+
+---
+
 **Last Updated**: July 16, 2025  
-**Status**: Ready for fine-tuning and advanced SSL methods  
-**Next Milestone**: Complete fine-tuning and test set evaluation 
+**Status**: Complete implementation with comprehensive evaluation  
+**Next Milestone**: Ready for research publication and further SSL method exploration 

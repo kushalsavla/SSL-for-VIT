@@ -10,7 +10,7 @@
 #SBATCH --cpus-per-task=2
 
 # ----------------------------------------
-# ✅ Environment Setup
+# Environment Setup
 # ----------------------------------------
 
 echo "⏱️ Job started on: $(date)"
