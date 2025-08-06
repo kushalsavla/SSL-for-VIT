@@ -136,6 +136,52 @@ def load_ibot_model(model_path, device):
         print(f"❌ Error loading iBOT model: {e}")
         return None
 
+def load_mae_model(model_path, device):
+    """Load MAE model."""
+    print(f"Loading MAE model from {model_path}")
+    
+    if not os.path.exists(model_path):
+        print(f"⚠️ MAE model path {model_path} not found")
+        return None
+    
+    try:
+        # Add MAE scripts to path
+        sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'scripts', 'mae'))
+        from models_vit import vit_tiny_patch4_32
+        
+        # Create model
+        model = vit_tiny_patch4_32(num_classes=10, global_pool=True)
+        
+        # Load checkpoint
+        checkpoint = torch.load(model_path, map_location=device)
+        
+        # Handle different checkpoint formats
+        if 'model' in checkpoint:
+            state_dict = checkpoint['model']
+        elif 'model_state_dict' in checkpoint:
+            state_dict = checkpoint['model_state_dict']
+        else:
+            state_dict = checkpoint
+        
+        # Remove classification head if shape mismatches
+        model_state = model.state_dict()
+        for k in ['head.weight', 'head.bias']:
+            if k in state_dict and k in model_state and state_dict[k].shape != model_state[k].shape:
+                print(f"Removing key {k} from checkpoint due to shape mismatch")
+                del state_dict[k]
+        
+        load_msg = model.load_state_dict(state_dict, strict=False)
+        print(f"Load message: {load_msg}")
+        print(f"✅ MAE model loaded successfully.")
+        
+        model.to(device)
+        model.eval()
+        return model
+        
+    except Exception as e:
+        print(f"❌ Error loading MAE model: {e}")
+        return None
+
 def preprocess_image(image_path, target_size=32):
     """Preprocess image for model input."""
     if image_path.endswith('.npy'):
@@ -161,15 +207,31 @@ def preprocess_image(image_path, target_size=32):
 
     return tensor, image
 
-def classify_image(model, image_tensor, device):
+def classify_image(model, image_tensor, device, model_type="unknown"):
     """Classify image and return top 5 predictions."""
     with torch.no_grad():
         model.eval()
         image_tensor = image_tensor.to(device)
-        outputs = model(image_tensor)
-        probabilities = torch.softmax(outputs, dim=1)
         
-        # Get top 5 predictions
+        # Handle different model types
+        if model_type == "mae":
+            try:
+                outputs = model(image_tensor)
+            except TypeError:
+                # Try without attn_mask for MAE
+                try:
+                    outputs = model.forward_features(image_tensor)
+                    outputs = model.head(outputs)
+                except:
+                    print("❌ Failed to run MAE model")
+                    return None, None
+        else:
+            outputs = model(image_tensor)
+        
+        if isinstance(outputs, tuple):
+            outputs = outputs[0]  # Handle tuple outputs
+        
+        probabilities = torch.softmax(outputs, dim=1)
         top_probs, top_indices = torch.topk(probabilities, 5, dim=1)
         
         return top_probs[0].cpu().numpy(), top_indices[0].cpu().numpy()
@@ -185,12 +247,16 @@ def create_comprehensive_visualization(image, results, image_path):
         axes[0, 0].axis('off')
         
         # Create bar plots for each model
-        models = ['ViT', 'DINO', 'iBOT']
-        colors = ['#1f77b4', '#ff7f0e', '#2ca02c']
+        models = ['ViT', 'DINO', 'iBOT', 'MAE']
+        colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728']
         
         for i, (model_name, (top_probs, top_indices), color) in enumerate(zip(models, results, colors)):
-            row = i // 2 + 1
-            col = i % 2 + 1
+            if i < 3:
+                row = 1
+                col = i + 1
+            else:
+                row = 2
+                col = 1
             
             y_pos = np.arange(len(top_indices))
             bars = axes[row, col].barh(y_pos, top_probs, color=color, alpha=0.7)
@@ -206,6 +272,8 @@ def create_comprehensive_visualization(image, results, image_path):
         
         # Hide the unused subplot
         axes[0, 2].axis('off')
+        axes[2, 2].axis('off')
+        axes[2, 3].axis('off')
         
         plt.tight_layout()
         
@@ -221,7 +289,7 @@ def create_comprehensive_visualization(image, results, image_path):
 
 def print_comprehensive_results(results):
     """Print comprehensive results for all models."""
-    models = ['ViT', 'DINO', 'iBOT']
+    models = ['ViT', 'DINO', 'iBOT', 'MAE']
     
     print("\n" + "="*80)
     print("🔍 COMPREHENSIVE MODEL COMPARISON RESULTS")
@@ -246,6 +314,7 @@ def main():
     vit_model_path = "models/vit/best_vit_small_model.pth"
     dino_model_path = "models/dino/best_dino_fine_tuned_model.pth"
     ibot_model_path = "models/ibot/best_fine_tuned_model.pth"
+    mae_model_path = "models/mae/best_mae_finetuned_model.pth"
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"🚀 Starting Comprehensive Analysis on {device}")
@@ -287,6 +356,16 @@ def main():
         results.append((ibot_probs, ibot_indices))
     else:
         print("❌ iBOT model failed to load")
+        results.append((np.zeros(5), np.zeros(5, dtype=int)))
+    
+    # MAE
+    print("\n🤖 Loading MAE model...")
+    mae_model = load_mae_model(mae_model_path, device)
+    if mae_model is not None:
+        mae_probs, mae_indices = classify_image(mae_model, image_tensor, device, "mae")
+        results.append((mae_probs, mae_indices))
+    else:
+        print("❌ MAE model failed to load")
         results.append((np.zeros(5), np.zeros(5, dtype=int)))
     
     # Print results

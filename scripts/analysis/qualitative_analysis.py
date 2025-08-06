@@ -26,6 +26,17 @@ import sys
 sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'external', 'dino', 'dinov2'))
 from models.vision_transformer import vit_small
 
+# Add MAE scripts to path
+mae_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'mae')
+sys.path.append(mae_path)
+try:
+    from models_vit import vit_tiny_patch4_32
+    MAE_AVAILABLE = True
+    print(f"✅ MAE models available from: {mae_path}")
+except ImportError as e:
+    print(f"⚠️ MAE models not available - skipping MAE functionality: {e}")
+    MAE_AVAILABLE = False
+
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
@@ -121,6 +132,45 @@ def load_ibot_model(model_path):
     print("✅ iBOT model loaded successfully")
     return model
 
+def load_mae_model(model_path, device, model_type="mae_finetune"):
+    """Load MAE ViT model for qualitative analysis."""
+    if not MAE_AVAILABLE:
+        print("❌ MAE models not available")
+        return None
+        
+    print(f"Loading MAE {model_type} model from {model_path}")
+    
+    # Create model
+    model = vit_tiny_patch4_32(num_classes=10, global_pool=True)
+    
+    if os.path.exists(model_path):
+        checkpoint = torch.load(model_path, map_location=device)
+        
+        # Handle different checkpoint formats
+        if 'model' in checkpoint:
+            state_dict = checkpoint['model']
+        elif 'model_state_dict' in checkpoint:
+            state_dict = checkpoint['model_state_dict']
+        else:
+            state_dict = checkpoint
+        
+        # Remove classification head if shape mismatches
+        model_state = model.state_dict()
+        for k in ['head.weight', 'head.bias']:
+            if k in state_dict and k in model_state and state_dict[k].shape != model_state[k].shape:
+                print(f"Removing key {k} from checkpoint due to shape mismatch")
+                del state_dict[k]
+        
+        load_msg = model.load_state_dict(state_dict, strict=False)
+        print(f"Load message: {load_msg}")
+        print(f"✅ MAE {model_type} model loaded successfully.")
+    else:
+        print(f"⚠️ Model path {model_path} not found, using randomly initialized weights")
+    
+    model.to(device)
+    model.eval()
+    return model
+
 def preprocess_image(image_path, target_size=32):
     """Preprocess image for model input."""
     # Load image
@@ -156,8 +206,26 @@ def classify_image(model, image_tensor, model_type="vit"):
     image_tensor = image_tensor.to(device)
     
     with torch.no_grad():
-        # Get predictions
-        outputs = model(image_tensor)
+        # Get predictions - handle different model types
+        if model_type.startswith('mae'):
+            # For MAE models, we need to call forward_features directly to avoid attn_mask issue
+            try:
+                # Try direct forward first
+                outputs = model(image_tensor)
+            except TypeError as e:
+                if 'attn_mask' in str(e):
+                    # If attn_mask error, call forward_features directly
+                    features = model.forward_features(image_tensor)
+                    outputs = model.head(features)
+                else:
+                    raise e
+        else:
+            # DINO and other models
+            outputs = model(image_tensor)
+        
+        if isinstance(outputs, tuple):
+            outputs = outputs[0]  # Handle tuple outputs
+        
         probabilities = torch.softmax(outputs, dim=1)
         
         # Get top predictions
@@ -198,8 +266,10 @@ def visualize_results(image, top_probs, top_indices, model_type, image_path):
         
         plt.tight_layout()
         
-        # Save plot
-        output_path = f'qualitative_results_{model_type}_{os.path.splitext(os.path.basename(image_path))[0]}.png'
+        # Save plot in results directory
+        output_dir = "results/qualitative_analysis"
+        os.makedirs(output_dir, exist_ok=True)
+        output_path = f'{output_dir}/qualitative_results_{model_type}_{os.path.splitext(os.path.basename(image_path))[0]}.png'
         plt.savefig(output_path, dpi=300, bbox_inches='tight')
         print(f"📊 Results saved to: {output_path}")
         
@@ -227,12 +297,17 @@ def main():
     parser = argparse.ArgumentParser(description='Qualitative Analysis for SSL ViT Models')
     parser.add_argument('--image_path', type=str, default='../final_evaluation/test_airplane.png',
                        help='Path to the image to classify')
-    parser.add_argument('--model_type', type=str, choices=['vit', 'ibot', 'dino'], default='dino',
-                       help='Type of model to use (vit, ibot, or dino)')
+    parser.add_argument('--model_type', type=str, 
+                       choices=['vit', 'ibot', 'dino', 'mae_finetune', 'mae_linear', 'mae_nonlinear'], 
+                       default='dino',
+                       help='Type of model to use (vit, ibot, dino, or mae variants)')
     parser.add_argument('--vit_model_path', type=str, default='models/vit/best_vit_small_model.pth',
                        help='Path to ViT model checkpoint')
     parser.add_argument('--ibot_model_path', type=str, default='models/ibot/best_fine_tuned_model.pth',
                        help='Path to iBOT model checkpoint')
+    parser.add_argument('--mae_model_path', type=str, 
+                       default='/work/dlclarge2/savlak-sslViT/SSL-for-VIT/models/mae/best_mae_finetuned_model.pth',
+                       help='Path to MAE model checkpoint')
     parser.add_argument('--no_plot', action='store_true',
                        help='Skip plotting results')
     
@@ -244,12 +319,15 @@ def main():
         return
     
     # Check if model path exists
-    if args.model_type == 'dino':
+    if args.model_type in ['dino', 'vit']:
         model_path = args.vit_model_path
-    elif args.model_type == 'vit':
-        model_path = args.vit_model_path
-    else:  # ibot
+    elif args.model_type == 'ibot':
         model_path = args.ibot_model_path
+    elif args.model_type.startswith('mae'):
+        model_path = args.mae_model_path
+    else:
+        print(f"❌ Error: Unknown model type: {args.model_type}")
+        return
         
     if not os.path.exists(model_path):
         print(f"❌ Error: Model file not found: {model_path}")
@@ -263,12 +341,18 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
    
     # Load model
-    if args.model_type == 'dino':
+    if args.model_type in ['dino', 'vit']:
         model = load_vit_model(model_path, device)
-    elif args.model_type == 'vit':
-        model = load_vit_model(model_path, device)
-    else:  # ibot
+    elif args.model_type == 'ibot':
         model = load_ibot_model(model_path)
+    elif args.model_type.startswith('mae'):
+        model = load_mae_model(model_path, device, args.model_type)
+        if model is None:
+            print("❌ Failed to load MAE model. Exiting.")
+            return
+    else:
+        print(f"❌ Error: Unknown model type: {args.model_type}")
+        return
     
     # Preprocess image
     print("🔄 Preprocessing image...")
