@@ -1,11 +1,12 @@
 #!/bin/bash
 
-# SSL for Vision Transformers (ViT) - Setup Script
+# SSL for Vision Transformers (ViT) - Complete Setup Script
 # This script sets up the complete environment for the SSL ViT project
 
 set -e  # Exit on any error
 
 echo "🚀 Setting up SSL for Vision Transformers (ViT) project..."
+echo "=================================================="
 
 # Colors for output
 RED='\033[0;31m'
@@ -37,10 +38,18 @@ if [ ! -f "README.md" ] || [ ! -f "requirements.txt" ]; then
     exit 1
 fi
 
-print_status "Setting up external dependencies..."
+print_status "Creating project directory structure..."
 
-# Create external directory if it doesn't exist
+# Create necessary directories
+mkdir -p data/cifar10_splits
+mkdir -p models/{vit,dino,mae,ibot}
+mkdir -p results/{final_evaluation,qualitative_analysis}
+mkdir -p outputs
 mkdir -p external
+
+print_success "Directory structure created"
+
+print_status "Setting up external dependencies..."
 
 # Clone iBOT repository
 if [ ! -d "external/ibot" ]; then
@@ -60,7 +69,7 @@ else
     print_warning "DINO v2 repository already exists, skipping..."
 fi
 
-# Clone MAE repository (if needed)
+# Clone MAE repository
 if [ ! -d "external/mae" ]; then
     print_status "Cloning MAE repository..."
     git clone https://github.com/facebookresearch/mae.git external/mae
@@ -71,27 +80,54 @@ fi
 
 print_status "Setting up Python environment..."
 
-# Check if virtual environment exists
-if [ ! -d "venv" ] && [ ! -d ".venv" ]; then
-    print_status "Creating virtual environment..."
-    python3 -m venv venv
-    print_success "Virtual environment created"
+# Check if conda is available
+if command -v conda &> /dev/null; then
+    print_status "Conda detected. Creating conda environment..."
+    
+    # Create conda environment if it doesn't exist
+    if ! conda env list | grep -q "rl_project"; then
+        conda create -n rl_project python=3.10 -y
+        print_success "Conda environment 'rl_project' created"
+    else
+        print_warning "Conda environment 'rl_project' already exists"
+    fi
+    
+    # Activate conda environment
+    eval "$(conda shell.bash hook)"
+    conda activate rl_project
+    print_success "Activated conda environment: rl_project"
+    
+    # Upgrade pip and install requirements in conda environment
+    print_status "Upgrading pip..."
+    pip install --upgrade pip
+    
+    print_status "Installing Python dependencies in conda environment..."
+    pip install -r requirements.txt
+    
+else
+    print_status "Conda not found. Using virtual environment..."
+    
+    # Check if virtual environment exists
+    if [ ! -d "venv" ] && [ ! -d ".venv" ]; then
+        print_status "Creating virtual environment..."
+        python3 -m venv venv
+        print_success "Virtual environment created"
+    fi
+
+    # Activate virtual environment
+    if [ -d "venv" ]; then
+        source venv/bin/activate
+    elif [ -d ".venv" ]; then
+        source .venv/bin/activate
+    fi
+    
+    # Upgrade pip and install requirements in virtual environment
+    print_status "Upgrading pip..."
+    pip install --upgrade pip
+    
+    print_status "Installing Python dependencies in virtual environment..."
+    pip install -r requirements.txt
 fi
-
-# Activate virtual environment
-if [ -d "venv" ]; then
-    source venv/bin/activate
-elif [ -d ".venv" ]; then
-    source .venv/bin/activate
-fi
-
-# Upgrade pip
-print_status "Upgrading pip..."
-pip install --upgrade pip
-
-# Install requirements
-print_status "Installing Python dependencies..."
-pip install -r requirements.txt
 
 # Install additional dependencies for external repositories
 print_status "Installing additional dependencies for external repositories..."
@@ -172,25 +208,76 @@ print_status "Setting up SLURM scripts..."
 # Make SLURM scripts executable
 find scripts -name "*.sh" -exec chmod +x {} \;
 
+print_status "Downloading CIFAR-10 dataset..."
+if [ ! -f "data/cifar-10-python.tar.gz" ]; then
+    wget -O data/cifar-10-python.tar.gz https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+    print_success "CIFAR-10 dataset downloaded"
+else
+    print_warning "CIFAR-10 dataset already exists, skipping download..."
+fi
+
+# Extract CIFAR-10 if not already extracted
+if [ ! -d "data/cifar-10-batches-py" ]; then
+    print_status "Extracting CIFAR-10 dataset..."
+    tar -xzf data/cifar-10-python.tar.gz -C data/
+    print_success "CIFAR-10 dataset extracted"
+else
+    print_warning "CIFAR-10 dataset already extracted, skipping..."
+fi
+
+# Create data splits if they don't exist
+if [ ! -f "data/cifar10_splits/train_images.npy" ]; then
+    print_status "Creating CIFAR-10 data splits..."
+    python scripts/data_download_and_split/create_cifar10_splits.py
+    print_success "CIFAR-10 data splits created"
+else
+    print_warning "CIFAR-10 data splits already exist, skipping..."
+fi
+
 print_success "Setup completed successfully! 🎉"
 echo ""
-echo "📋 Next steps:"
-echo "1. Activate the virtual environment:"
-echo "   source venv/bin/activate"
+echo "=================================================="
+echo "📋 Next Steps:"
+echo "=================================================="
 echo ""
-echo "2. Run a quick test to verify setup:"
-echo "   python scripts/vit/train_vit.py --mode supervised"
+echo "1. Activate the environment:"
+if command -v conda &> /dev/null; then
+    echo "   conda activate rl_project"
+else
+    echo "   source venv/bin/activate"
+fi
 echo ""
-echo "3. For SLURM jobs, use the scripts in the scripts/ directory"
+echo "2. Run experiments:"
+echo "   # Test on unseen data"
+echo "   sbatch scripts/analysis/test_unseen_data.sh"
+echo ""
+echo "   # Qualitative analysis"
+echo "   sbatch scripts/analysis/qualitative_analysis.sh"
+echo ""
+echo "   # Model comparison analysis"
+echo "   sbatch scripts/analysis/model_comparison.sh"
+echo ""
+echo "3. Individual model training:"
+echo "   # Supervised ViT"
+echo "   sbatch scripts/vit/train_vit_job.sh"
+echo ""
+echo "   # DINO SSL"
+echo "   sbatch scripts/dino/dino_fine_tune.sh"
+echo ""
+echo "   # MAE SSL"
+echo "   sbatch scripts/mae/run_mae_finetune.sh"
+echo ""
+echo "   # iBOT SSL"
+echo "   sbatch scripts/ibot/run_improved_pipeline.sh"
 echo ""
 echo "📚 Documentation:"
-echo "- README.md: Main project documentation"
-echo "- docs/SETUP_INSTRUCTIONS.md: Detailed setup instructions"
-echo "- docs/EXTERNAL_DEPENDENCIES.md: External repository information"
+echo "- README.md: Complete project documentation"
+echo "- results/final_evaluation/: Final results and graphs"
+echo "- results/qualitative_analysis/: Qualitative analysis results"
 echo ""
 echo "🔧 External repositories:"
 echo "- iBOT: external/ibot/"
-echo "- DINO v2: external/dino/dinov2/"
+echo "- DINO v2: external/dino/"
 echo "- MAE: external/mae/"
 echo ""
 print_success "Happy training! 🚀" 

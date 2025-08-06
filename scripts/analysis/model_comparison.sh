@@ -1,8 +1,8 @@
 #!/bin/bash
-#SBATCH --job-name=comprehensive_analysis
-#SBATCH --output=comprehensive_analysis_%j.out
-#SBATCH --error=comprehensive_analysis_%j.err
-#SBATCH --time=00:10:00
+#SBATCH --job-name=model_comparison
+#SBATCH --output=outputs/model_comparison_%j.out
+#SBATCH --error=outputs/model_comparison_%j.err
+#SBATCH --time=01:00:00
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
@@ -26,10 +26,16 @@ python --version
 # Set working directory
 cd /work/dlclarge2/savlak-sslViT/SSL-for-VIT
 echo "Current working directory: $(pwd)"
-ls -la
 
-echo "🚀 Launching Comprehensive Analysis..."
-python comprehensive_analysis.py
+# Create outputs directory if it doesn't exist
+mkdir -p outputs
 
-echo "✅ Comprehensive analysis complete at: $(date)"
-echo "🏁 Comprehensive analysis run complete at: $(date)" 
+echo "🚀 Launching Model Comparison Analysis..."
+echo "📊 Mode: Both single-image and multi-image analysis"
+
+# Run model comparison (both single and multi-image analysis)
+python scripts/analysis/model_comparison.py --mode both --num_samples 100
+
+echo "✅ Model comparison complete at: $(date)"
+echo "📊 Results saved to: results/final_evaluation/"
+echo "🏁 Model comparison run complete at: $(date)" 

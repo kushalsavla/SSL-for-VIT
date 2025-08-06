@@ -1,23 +1,29 @@
-# SSL for Vision Transformers (ViT)
+# SSL for Vision Transformers (ViT) - Complete Implementation
 
-A comprehensive implementation of Self-Supervised Learning (SSL) methods for Vision Transformers on the CIFAR-10 dataset. This repository includes implementations of **iBOT**, **DINO**, and **Supervised ViT** training with detailed evaluation pipelines.
+A comprehensive implementation and comparison of Self-Supervised Learning (SSL) methods for Vision Transformers on the CIFAR-10 dataset. This repository includes implementations of **DINO**, **MAE**, **iBOT**, and **Supervised ViT** with complete training, evaluation, and analysis pipelines.
 
 ## 🎯 **Project Overview**
 
 This project implements and compares different approaches for training Vision Transformers:
 
 1. **Supervised ViT**: Traditional supervised learning baseline
-2. **iBOT SSL**: Self-supervised learning with teacher-student architecture
-3. **DINO SSL**: Emerging properties in self-supervised vision transformers
+2. **DINO SSL**: Emerging properties in self-supervised vision transformers
+3. **MAE SSL**: Masked Autoencoders for Vision Transformers
+4. **iBOT SSL**: Self-supervised learning with teacher-student architecture
 
 ## 📊 **Results Summary**
 
-| Method | Test Accuracy | Training Time | Status |
-|--------|---------------|---------------|--------|
-| **Supervised ViT** | 26.36% | ~25 min | ✅ Completed |
-| **iBOT Linear Probe** | 15.65% | ~2 min | ✅ Completed |
-| **iBOT Non-linear Probe** | 22.96% | ~5 min | ✅ Completed |
-| **iBOT Fine-tuning** | Expected: 68-75% | ~48 min | 🔄 Ready |
+| Method | Test Accuracy | Improvement | Status |
+|--------|---------------|-------------|--------|
+| **Supervised ViT** | 7.58% | Baseline | ✅ Completed |
+| **DINO SSL** | **84.69%** | +77.11% | ✅ Completed |
+| **MAE SSL** | 81.99% | +74.41% | ✅ Completed |
+| **iBOT SSL** | 71.11% | +63.53% | ✅ Completed |
+
+**Key Findings:**
+- **DINO leads** with 84.69% accuracy on unseen CIFAR-10 test data
+- **All SSL methods** dramatically outperform supervised learning
+- **Massive performance gap** demonstrates SSL effectiveness
 
 ## 🚀 **Quick Start**
 
@@ -25,22 +31,38 @@ This project implements and compares different approaches for training Vision Tr
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/kushalsavla/SSL-for-VIT.git
 cd SSL-for-VIT
 
-# Install dependencies
-pip install -r requirements.txt
+# Run the setup script (automates everything)
+bash setup.sh
 ```
 
-### **2. Data Preparation**
+The setup script will:
+- Install all dependencies
+- Set up conda environment
+- Download and prepare CIFAR-10 data
+- Create necessary directories
+
+### **2. Manual Setup (Alternative)**
+
+```bash
+# Install dependencies
+pip install -r requirements.txt
+
+# Activate conda environment (if using conda)
+conda activate rl_project
+```
+
+### **3. Data Preparation**
 
 The project uses custom CIFAR-10 splits:
 - Train: 45,000 images
-- Validation: 5,000 images
+- Validation: 5,000 images  
 - Test: 10,000 images
 - Probe: 5,000 images
 
-Data files should be placed in `./data/cifar10_splits/`:
+Data files are automatically placed in `./data/cifar10_splits/`:
 ```
 data/cifar10_splits/
 ├── train_images.npy
@@ -51,7 +73,25 @@ data/cifar10_splits/
 └── test_labels.npy
 ```
 
-### **3. Running Experiments**
+## 🏃‍♂️ **Running Experiments**
+
+### **Complete Pipeline (Recommended)**
+
+```bash
+# 1. Train all models
+bash scripts/run_complete_pipeline.sh
+
+# 2. Test on unseen data
+bash scripts/analysis/test_unseen_data.sh
+
+# 3. Run qualitative analysis
+bash scripts/analysis/qualitative_analysis.sh
+
+# 4. Generate model comparison
+bash scripts/analysis/model_comparison.sh
+```
+
+### **Individual Model Training**
 
 #### **Supervised ViT Training**
 ```bash
@@ -59,35 +99,42 @@ cd scripts/vit
 sbatch train_vit_job.sh
 ```
 
-#### **iBOT SSL Pipeline**
-```bash
-cd scripts/ibot
-# Complete pipeline (recommended)
-sbatch run_improved_pipeline.sh
-
-# Or individual steps
-sbatch ibot_pretrain.sh    # SSL pretraining
-sbatch fine_tune.sh        # Fine-tuning
-sbatch linear_probe.sh     # Linear evaluation
-sbatch nonlinear_probe.sh  # Non-linear evaluation
-```
-
-#### **DINO Fine-tuning**
+#### **DINO SSL Pipeline**
 ```bash
 cd scripts/dino
 sbatch dino_fine_tune.sh
 ```
 
+#### **MAE SSL Pipeline**
+```bash
+cd scripts/mae
+sbatch run_mae_finetune.sh
+```
+
+#### **iBOT SSL Pipeline**
+```bash
+cd scripts/ibot
+sbatch run_improved_pipeline.sh
+```
+
+### **Evaluation and Analysis**
+
 #### **Test on Unseen Data**
 ```bash
-cd scripts
+cd scripts/analysis
 sbatch test_unseen_data.sh
 ```
 
 #### **Qualitative Analysis**
 ```bash
-cd scripts
+cd scripts/analysis
 sbatch qualitative_analysis.sh
+```
+
+#### **Model Comparison Analysis**
+```bash
+cd scripts/analysis
+sbatch model_comparison.sh
 ```
 
 ## 📁 **Repository Structure**
@@ -96,169 +143,106 @@ sbatch qualitative_analysis.sh
 SSL-for-VIT/
 ├── scripts/                      # All training and evaluation scripts
 │   ├── vit/                     # Supervised ViT scripts
-│   ├── ibot/                    # iBOT SSL scripts (uses external/ibot)
-│   ├── dino/                    # DINO SSL scripts (uses external/dino)
-│   └── *.py                     # General evaluation scripts
-├── models/                       # Trained model checkpoints
+│   ├── dino/                    # DINO SSL scripts
+│   ├── mae/                     # MAE SSL scripts
+│   ├── ibot/                    # iBOT SSL scripts
+│   └── analysis/                # Evaluation and analysis scripts
+│       ├── model_comparison.py  # Comprehensive model comparison
+│       ├── qualitative_analysis.py  # Qualitative analysis
+│       └── test_unseen_data.py  # Quantitative evaluation
+├── models/                      # Trained model checkpoints
 │   ├── vit/                     # Supervised ViT models
-│   ├── ibot/                    # iBOT SSL models
-│   └── dino/                    # DINO SSL models
-├── results/                      # Training results and metrics
-│   ├── vit/                     # ViT results
-│   ├── ibot/                    # iBOT results
-│   └── dino/                    # DINO results
-├── docs/                         # Documentation
-│   ├── SSL_ViT_Comparison_Results.md
-│   ├── SETUP_INSTRUCTIONS.md
-│   └── GITHUB_README.md
-├── data/                         # CIFAR-10 dataset and splits
-├── external/                     # External repositories (not in this repo)
-│   ├── ibot/                    # Official iBOT repository (cloned separately)
-│   └── dino/                    # Official DINO v2 repository (cloned separately)
-├── outputs/                      # SLURM job outputs (not pushed to GitHub)
-├── requirements.txt              # Python dependencies
-└── README.md                     # This file
+│   ├── dino/                    # DINO fine-tuned models
+│   ├── mae/                     # MAE fine-tuned models
+│   └── ibot/                    # iBOT fine-tuned models
+├── data/                        # Dataset and splits
+│   └── cifar10_splits/          # CIFAR-10 data splits
+├── results/                     # All results and outputs
+│   ├── final_evaluation/        # Final test results and poster graphs
+│   └── qualitative_analysis/    # Qualitative analysis results
+├── external/                    # External dependencies
+│   ├── dino/                    # DINO v2 implementation
+│   └── ibot/                    # iBOT implementation
+├── setup.sh                     # Complete environment setup
+├── requirements.txt             # Python dependencies
+└── README.md                    # This file
 ```
-
-## 🔧 **Technical Details**
-
-### **Model Architecture**
-- **Backbone**: ViT-Small (vit_small_patch16_224)
-- **Patch Size**: 4×4 (optimized for 32×32 images)
-- **Embedding Dimension**: 384
-- **Number of Heads**: 6
-- **Number of Layers**: 12
-- **Total Parameters**: ~22M
-
-### **Training Configuration**
-- **Batch Size**: 128
-- **Optimizer**: AdamW
-- **Learning Rate**: 5e-4 (with cosine annealing)
-- **Weight Decay**: 1e-4
-- **Training Epochs**: 100-200
-- **Hardware**: Single RTX 2080 GPU
-
-### **SSL Implementation**
-- **Teacher-Student Architecture**: Momentum teacher with EMA updates
-- **Data Augmentation**: Random flip, crop, color jitter, grayscale, blur
-- **Loss Function**: Temperature-scaled contrastive loss
-- **Teacher Momentum**: 0.996
-
-## 📈 **Performance Analysis**
-
-### **SSL Pretraining Success**
-- ✅ **Excellent convergence**: Loss from 9.6 → 0.01
-- ✅ **Stable training**: No divergence or instability
-- ✅ **Feature learning**: Some semantic understanding achieved
-
-### **Evaluation Methods**
-1. **Linear Probing**: Fast baseline evaluation (15.65%)
-2. **Non-linear Probing**: MLP classifier (22.96%)
-3. **Fine-tuning**: End-to-end training (expected 68-75%)
-
-### **Class-Specific Performance**
-- **Best classes**: ship (66.8%), truck (35%)
-- **Poor performance**: Most classes show 0% precision/recall
-- **SSL learning**: Some semantic understanding for vehicle classes
-
-## 🎯 **Key Features**
-
-### **✅ Implemented**
-- Complete SSL pretraining pipeline
-- Linear and non-linear probing evaluation
-- Fine-tuning with enhanced hyperparameters
-- Comprehensive logging and metrics
-- SLURM job automation
-- Error-free, robust implementation
-
-### **🔄 Ready to Run**
-- Enhanced fine-tuning pipeline
-- Test on unseen data evaluation
-- Performance comparison scripts
-- Results visualization
-
-### **📊 Monitoring**
-- Real-time training metrics
-- Validation accuracy tracking
-- Loss progression visualization
-- Comprehensive result summaries
-
-## 🚀 **Advanced Usage**
-
-### **Custom Hyperparameters**
-```bash
-# Fine-tuning with custom parameters
-python fine_tune.py \
-    --epochs 150 \
-    --backbone_lr 1e-5 \
-    --classifier_lr 1e-4 \
-    --batch_size 256
-```
-
-### **Different SSL Methods**
-```bash
-# Run DINO SSL (teammate implementation)
-cd dino
-python train_dino.py
-
-# Compare results
-python ../test_unseen_data.py \
-    --dino_model_path ./dino_output/best_model.pth
-```
-
-### **Performance Optimization**
-- **Mixed Precision**: FP16 training for faster convergence
-- **Gradient Clipping**: Stable training with large learning rates
-- **Early Stopping**: Prevent overfitting
-- **Learning Rate Scheduling**: Cosine annealing for better convergence
 
 ## 📊 **Results and Analysis**
 
-### **Current Performance**
-- **Supervised ViT**: 26.36% validation accuracy (peak)
-- **iBOT SSL**: 15.65% linear, 22.96% non-linear probing
-- **Expected Fine-tuning**: 68-75% test accuracy
+### **Quantitative Results**
+- **Final test results**: `results/final_evaluation/final_test_results.txt`
+- **Performance graphs**: `results/final_evaluation/poster_*.png`
+- **Qualitative analysis**: `results/qualitative_analysis/`
 
-### **Improvement Opportunities**
-1. **Better SSL features**: Enhanced augmentation strategies
-2. **Multi-scale training**: Different crop sizes for better features
-3. **Advanced SSL methods**: MAE, SimCLR, or BYOL
-4. **Hyperparameter optimization**: Systematic tuning
+### **Key Performance Metrics**
+- **Accuracy**: Test accuracy on unseen CIFAR-10 data
+- **Throughput**: Images processed per second
+- **Training time**: Total training duration
+- **Improvement**: Performance gain over supervised baseline
+
+## 🔧 **Technical Details**
+
+### **Model Architectures**
+- **ViT-Small**: 384 dimensions, 6 heads, 12 layers
+- **Patch Size**: 4x4 for CIFAR-10 (32x32 images)
+- **Image Size**: 32x32 pixels
+- **Classes**: 10 (CIFAR-10)
+
+### **Training Details**
+- **Optimizer**: AdamW with cosine learning rate scheduling
+- **Batch Size**: 128 (adjustable)
+- **Epochs**: 50-100 depending on method
+- **Hardware**: GPU recommended (RTX 2080+)
+
+### **SSL Methods**
+- **DINO**: Teacher-student with momentum encoder
+- **MAE**: Masked autoencoding with reconstruction
+- **iBOT**: Masked image modeling with teacher-student
+
+## 📈 **Performance Comparison**
+
+### **Accuracy Rankings**
+1. **DINO SSL**: 84.69% (Best performer)
+2. **MAE SSL**: 81.99% (Very competitive)
+3. **iBOT SSL**: 71.11%
+4. **Supervised ViT**: 7.58% (Baseline)
+
+### **Improvement over Supervised**
+- **DINO**: +77.11% improvement
+- **MAE**: +74.41% improvement
+- **iBOT**: +63.53% improvement
+
+## 🎨 **Poster and Presentation**
+
+The repository includes ready-to-use content for presentations:
+- **Performance graphs**: `results/final_evaluation/poster_*.png`
+- **Qualitative examples**: `results/qualitative_analysis/`
+- **Complete results**: `results/final_evaluation/final_test_results.txt`
 
 ## 🤝 **Contributing**
 
-This project is part of a team effort on SSL for Vision Transformers:
-- **iBOT Implementation**: This repository
-- **DINO Implementation**: Teammate's repository
-- **MAE Implementation**: Teammate's repository
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 📄 **Documentation**
+## 📄 **License**
 
-- **SSL_ViT_Results_Summary.md**: Comprehensive results analysis
-- **ibot/improved_pipeline_summary.md**: iBOT pipeline details
-- **final_test_results.txt**: Final evaluation results
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 🔍 **Troubleshooting**
+## 🙏 **Acknowledgments**
 
-### **Common Issues**
-1. **CUDA out of memory**: Reduce batch size
-2. **Model loading errors**: Check model paths and formats
-3. **Data loading issues**: Verify data file paths and formats
+- **DINO**: Facebook AI Research
+- **MAE**: Meta AI Research
+- **iBOT**: Microsoft Research
+- **ViT**: Google Research
 
-### **Performance Tips**
-1. **Use mixed precision**: Enable FP16 for faster training
-2. **Optimize batch size**: Balance memory and speed
-3. **Monitor GPU usage**: Ensure efficient resource utilization
+## 📞 **Contact**
 
-## 📞 **Support**
-
-For questions or issues:
-1. Check the troubleshooting section
-2. Review the comprehensive results document
-3. Examine the SLURM output files for error details
+For questions or issues, please open an issue on GitHub or contact the maintainers.
 
 ---
 
-**Status**: Ready for fine-tuning and advanced SSL methods  
-**Last Updated**: July 16, 2025  
-**Next Milestone**: Complete fine-tuning and test set evaluation
+**Note**: This repository provides a complete, reproducible implementation of SSL methods for Vision Transformers. All results are obtained on the same hardware and dataset splits for fair comparison.
