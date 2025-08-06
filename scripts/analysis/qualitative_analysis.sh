@@ -43,19 +43,19 @@ export CUDA_LAUNCH_BLOCKING=1
 # Check if image path is provided
 if [ -z "$1" ]; then
     echo "❌ Error: Please provide an image path as argument"
-    echo "Usage: sbatch qualitative_analysis.sh path/to/image.jpg"
+    echo "Usage: sbatch qualitative_analysis.sh path/to/image.jpg [vit|ibot|dino]"
     exit 1
 fi
 
 IMAGE_PATH="$1"
-MODEL_TYPE="${2:-vit}"  # Default to vit if not specified
+MODEL_TYPE="${2:-vit}"  # Default to vit if not specified (options: vit, ibot, dino)
 
 echo "🚀 Launching Qualitative Analysis..."
 echo "📸 Image: $IMAGE_PATH"
 echo "🤖 Model Type: $MODEL_TYPE"
 
 # Run qualitative analysis
-python -u qualitative_analysis.py \
+python -u scripts/analysis/qualitative_analysis.py \
     --image_path "$IMAGE_PATH" \
     --model_type "$MODEL_TYPE"
 

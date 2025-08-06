@@ -21,6 +21,10 @@ import torchvision.transforms as transforms
 from PIL import Image
 import matplotlib.pyplot as plt
 from pathlib import Path
+import sys 
+# Import vision transformer from external DINO v2 repository
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'external', 'dino', 'dinov2'))
+from models.vision_transformer import vit_small
 
 # Add project root to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -31,75 +35,37 @@ CIFAR10_CLASSES = [
     'dog', 'frog', 'horse', 'ship', 'truck'
 ]
 
-def load_vit_model(model_path):
-    """Load the supervised ViT model."""
-    import timm
-    
-    print(f"Loading ViT model from {model_path}")
-    
-    # Create ViT model with timm (matching the saved model structure)
-    try:
-        model = timm.create_model('vit_small_patch16_224', 
-                                patch_size=4, 
-                                num_classes=128,  # Match checkpoint head size
-                                img_size=32)
-        print("✅ Using vit_small_patch16_224 with img_size=32")
-    except Exception as e:
-        print(f"❌ Failed to create ViT model: {e}")
-        return None
-    
+
+class FineTunedDinoModel(nn.Module):
+    def __init__(self, backbone, num_classes=10):
+        super().__init__()
+        self.backbone = backbone
+        self.classifier = nn.Linear(384, num_classes)
+    def forward(self, x):
+        features = self.backbone(x)
+        return self.classifier(features)
+
+def load_vit_model(model_path, device):
+    print(f"Loading fine-tuned DINO model from {model_path}")
+    backbone = vit_small(img_size=32, patch_size=4)
+    model = FineTunedDinoModel(backbone, num_classes=10)
+    model.to(device)
+
     if os.path.exists(model_path):
-        checkpoint = torch.load(model_path, map_location='cpu')
-        
-        if 'model_state_dict' in checkpoint:
-            state_dict = checkpoint['model_state_dict']
+        checkpoint = torch.load(model_path, map_location=device)
+        if "model_state_dict" in checkpoint:
+            model.load_state_dict(checkpoint["model_state_dict"])
+            print("✅ Loaded full model (with classifier) from checkpoint.")
         else:
-            state_dict = checkpoint
-            
-        # Handle nested block structure in checkpoint
-        new_state_dict = {}
-        for key, value in state_dict.items():
-            if key == 'mask_token':
-                continue
-                
-            if key.startswith('blocks.0.'):
-                inner_key = key[9:]
-                if inner_key.startswith(('0.', '1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.', '10.', '11.')):
-                    parts = inner_key.split('.', 1)
-                    if len(parts) == 2:
-                        block_num = parts[0]
-                        rest = parts[1]
-                        new_key = f"blocks.{block_num}.{rest}"
-                        new_state_dict[new_key] = value
-                    else:
-                        new_state_dict[key] = value
-                else:
-                    new_state_dict[key] = value
-            elif key.startswith('head.'):
-                if key == 'head.1.weight':
-                    new_state_dict['head.weight'] = value
-                elif key == 'head.1.bias':
-                    new_state_dict['head.bias'] = value
-            else:
-                new_state_dict[key] = value
-                
-        model.load_state_dict(new_state_dict)
-        print(f"✅ Loaded ViT weights from {model_path}")
-        
-        # Replace the head with the correct one for CIFAR-10
-        model.head = nn.Linear(model.head.in_features, 10)
-        print("✅ Replaced head for CIFAR-10 classification (10 classes)")
+            model.load_state_dict(checkpoint)
+            print("✅ Loaded raw state_dict into full model.")
     else:
-        print(f"⚠️  ViT model path {model_path} not found")
-        return None
-    
-    # Move to GPU if available
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = model.to(device)
+        print(f"⚠️ Model path {model_path} not found, using randomly initialized weights")
+
     model.eval()
-    
-    print("✅ ViT model loaded successfully")
     return model
+
+
 
 def load_ibot_model(model_path):
     """Load the iBOT fine-tuned model."""
@@ -131,18 +97,9 @@ def load_ibot_model(model_path):
                 print(f"❌ Failed to create ViT backbone: {e}")
                 return None
             
-            # Create FineTunedViT model
-            class FineTunedViT(nn.Module):
-                def __init__(self, backbone, num_classes=10):
-                    super().__init__()
-                    self.backbone = backbone
-                    self.classifier = nn.Linear(backbone.num_features, num_classes)
-                    
-                def forward(self, x):
-                    features = self.backbone(x)
-                    return self.classifier(features)
             
-            model = FineTunedViT(backbone, num_classes=10)
+            
+            model = FineTunedDinoModel(backbone, num_classes=10)
             
             # Load state dict
             model.load_state_dict(state_dict)
@@ -151,12 +108,10 @@ def load_ibot_model(model_path):
         else:
             # Fallback to SimpleCNN
             print("⚠️ Could not load iBOT model: Using fallback SimpleCNN model")
-            model = SimpleCNN(num_classes=10)
             
     except Exception as e:
         print(f"⚠️ Could not load iBOT model: {e}")
         print("Using fallback SimpleCNN model")
-        model = SimpleCNN(num_classes=10)
     
     # Move to GPU if available
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -169,18 +124,28 @@ def load_ibot_model(model_path):
 def preprocess_image(image_path, target_size=32):
     """Preprocess image for model input."""
     # Load image
-    image = Image.open(image_path).convert('RGB')
+    if image_path.endswith('.npy'):
+        # Handle numpy array files
+        image_array = np.load(image_path)
+        image = Image.fromarray(image_array).convert('RGB')
+    else:
+        # Handle regular image files
+        image = Image.open(image_path).convert('RGB')
     
     # Resize to target size
     image = image.resize((target_size, target_size), Image.Resampling.LANCZOS)
     
-    # Convert to tensor
-    transform = transforms.Compose([
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.4914, 0.4822, 0.4465], std=[0.2023, 0.1994, 0.2010])
-    ])
+    # Convert to numpy array first, then to tensor
+    image_array = np.array(image).astype(np.float32) / 255.0
+    image_array = image_array.transpose(2, 0, 1)  # HWC to CHW
     
-    tensor = transform(image).unsqueeze(0)  # Add batch dimension
+    # Normalize
+    mean = np.array([0.4914, 0.4822, 0.4465]).reshape(3, 1, 1)
+    std = np.array([0.2023, 0.1994, 0.2010]).reshape(3, 1, 1)
+    image_array = (image_array - mean) / std
+    
+    # Convert to tensor
+    tensor = torch.tensor(image_array, dtype=torch.float32).unsqueeze(0)  # Add batch dimension
     
     return tensor, image
 
@@ -206,34 +171,43 @@ def classify_image(model, image_tensor, model_type="vit"):
 
 def visualize_results(image, top_probs, top_indices, model_type, image_path):
     """Visualize classification results."""
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
-    
-    # Display image
-    ax1.imshow(image)
-    ax1.set_title(f'Input Image: {os.path.basename(image_path)}')
-    ax1.axis('off')
-    
-    # Display predictions
-    y_pos = np.arange(len(top_indices))
-    ax2.barh(y_pos, top_probs)
-    ax2.set_yticks(y_pos)
-    ax2.set_yticklabels([CIFAR10_CLASSES[i] for i in top_indices])
-    ax2.set_xlabel('Probability')
-    ax2.set_title(f'Top 5 Predictions ({model_type.upper()} Model)')
-    ax2.invert_yaxis()
-    
-    # Add probability values on bars
-    for i, (prob, idx) in enumerate(zip(top_probs, top_indices)):
-        ax2.text(prob + 0.01, i, f'{prob:.3f}', va='center')
-    
-    plt.tight_layout()
-    
-    # Save plot
-    output_path = f'qualitative_results_{model_type}_{os.path.splitext(os.path.basename(image_path))[0]}.png'
-    plt.savefig(output_path, dpi=300, bbox_inches='tight')
-    print(f"📊 Results saved to: {output_path}")
-    
-    plt.show()
+    try:
+        # Create figure with explicit backend
+        import matplotlib
+        matplotlib.use('Agg')  # Use non-interactive backend
+        
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 5))
+        
+        # Display image
+        ax1.imshow(image)
+        ax1.set_title(f'Input Image: {os.path.basename(image_path)}')
+        ax1.axis('off')
+        
+        # Display predictions - use simple bar plot to avoid recursion
+        y_pos = np.arange(len(top_indices))
+        bars = ax2.barh(y_pos, top_probs)
+        ax2.set_yticks(y_pos)
+        ax2.set_yticklabels([CIFAR10_CLASSES[i] for i in top_indices])
+        ax2.set_xlabel('Probability')
+        ax2.set_title(f'Top 5 Predictions ({model_type.upper()} Model)')
+        ax2.invert_yaxis()
+        
+        # Add probability values on bars
+        for i, (prob, idx) in enumerate(zip(top_probs, top_indices)):
+            ax2.text(prob + 0.01, i, f'{prob:.3f}', va='center')
+        
+        plt.tight_layout()
+        
+        # Save plot
+        output_path = f'qualitative_results_{model_type}_{os.path.splitext(os.path.basename(image_path))[0]}.png'
+        plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        print(f"📊 Results saved to: {output_path}")
+        
+        plt.close()  # Close the figure to free memory
+        
+    except Exception as e:
+        print(f"⚠️ Visualization failed: {e}")
+        print("📊 Classification results still available above")
 
 def print_results(top_probs, top_indices, model_type):
     """Print classification results."""
@@ -251,13 +225,13 @@ def print_results(top_probs, top_indices, model_type):
 
 def main():
     parser = argparse.ArgumentParser(description='Qualitative Analysis for SSL ViT Models')
-    parser.add_argument('--image_path', type=str, required=True,
+    parser.add_argument('--image_path', type=str, default='../final_evaluation/test_airplane.png',
                        help='Path to the image to classify')
-    parser.add_argument('--model_type', type=str, choices=['vit', 'ibot'], required=True,
-                       help='Type of model to use (vit or ibot)')
-    parser.add_argument('--vit_model_path', type=str, default='vit/best_vit_small_model.pth',
+    parser.add_argument('--model_type', type=str, choices=['vit', 'ibot', 'dino'], default='dino',
+                       help='Type of model to use (vit, ibot, or dino)')
+    parser.add_argument('--vit_model_path', type=str, default='models/vit/best_vit_small_model.pth',
                        help='Path to ViT model checkpoint')
-    parser.add_argument('--ibot_model_path', type=str, default='ibot/fine_tune_results/best_fine_tuned_model.pth',
+    parser.add_argument('--ibot_model_path', type=str, default='models/ibot/best_fine_tuned_model.pth',
                        help='Path to iBOT model checkpoint')
     parser.add_argument('--no_plot', action='store_true',
                        help='Skip plotting results')
@@ -270,7 +244,13 @@ def main():
         return
     
     # Check if model path exists
-    model_path = args.vit_model_path if args.model_type == 'vit' else args.ibot_model_path
+    if args.model_type == 'dino':
+        model_path = args.vit_model_path
+    elif args.model_type == 'vit':
+        model_path = args.vit_model_path
+    else:  # ibot
+        model_path = args.ibot_model_path
+        
     if not os.path.exists(model_path):
         print(f"❌ Error: Model file not found: {model_path}")
         return
@@ -280,11 +260,14 @@ def main():
     print(f"🤖 Model: {args.model_type.upper()}")
     print(f"📁 Model Path: {model_path}")
     print("=" * 60)
-    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+   
     # Load model
-    if args.model_type == 'vit':
-        model = load_vit_model(model_path)
-    else:
+    if args.model_type == 'dino':
+        model = load_vit_model(model_path, device)
+    elif args.model_type == 'vit':
+        model = load_vit_model(model_path, device)
+    else:  # ibot
         model = load_ibot_model(model_path)
     
     # Preprocess image
