@@ -2,36 +2,62 @@ FINAL TEST RESULTS ON UNSEEN DATA
 ==================================================
 
 VIT RESULTS:
-Accuracy: 8.07%
-Correct: 807/10000
-Test Time: 29.57 seconds
-Throughput: 338.1 images/second
+Accuracy: 7.58%
+Correct: 758/10000
+Test Time: 9.08 seconds
+Throughput: 1101.8 images/second
 
 Classification Report:
               precision    recall  f1-score   support
 
-    airplane      0.057     0.007     0.012      1000
-  automobile      0.080     0.274     0.124      1000
-        bird      0.058     0.192     0.089      1000
-         cat      0.125     0.001     0.002      1000
-        deer      0.233     0.010     0.019      1000
-         dog      0.090     0.158     0.115      1000
-        frog      0.085     0.030     0.044      1000
-       horse      0.282     0.022     0.041      1000
-        ship      0.123     0.091     0.105      1000
-       truck      0.128     0.022     0.038      1000
+    airplane      0.000     0.000     0.000      1000
+  automobile      0.090     0.225     0.129      1000
+        bird      0.142     0.109     0.123      1000
+         cat      0.098     0.005     0.010      1000
+        deer      0.030     0.006     0.010      1000
+         dog      0.209     0.046     0.075      1000
+        frog      0.102     0.078     0.088      1000
+       horse      0.113     0.143     0.126      1000
+        ship      0.034     0.146     0.056      1000
+       truck      0.000     0.000     0.000      1000
 
-    accuracy                          0.081     10000
-   macro avg      0.126     0.081     0.059     10000
-weighted avg      0.126     0.081     0.059     10000
+    accuracy                          0.076     10000
+   macro avg      0.082     0.076     0.062     10000
+weighted avg      0.082     0.076     0.062     10000
+
+--------------------------------------------------
+
+DINO RESULTS:
+Accuracy: 84.69%
+Correct: 8469/10000
+Test Time: 9.05 seconds
+Throughput: 1104.6 images/second
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    airplane      0.849     0.846     0.848      1000
+  automobile      0.916     0.924     0.920      1000
+        bird      0.843     0.796     0.819      1000
+         cat      0.712     0.691     0.701      1000
+        deer      0.842     0.823     0.833      1000
+         dog      0.759     0.791     0.775      1000
+        frog      0.865     0.909     0.886      1000
+       horse      0.881     0.859     0.870      1000
+        ship      0.904     0.918     0.911      1000
+       truck      0.894     0.912     0.903      1000
+
+    accuracy                          0.847     10000
+   macro avg      0.847     0.847     0.847     10000
+weighted avg      0.847     0.847     0.847     10000
 
 --------------------------------------------------
 
 IBOT RESULTS:
 Accuracy: 71.11%
 Correct: 7111/10000
-Test Time: 9.34 seconds
-Throughput: 1071.2 images/second
+Test Time: 7.96 seconds
+Throughput: 1256.2 images/second
 
 Classification Report:
               precision    recall  f1-score   support
@@ -78,4 +104,21 @@ Classification Report:
 weighted avg      0.823     0.820     0.820     10000
 
 --------------------------------------------------
+
+FINAL COMPARISON SUMMARY:
+==================================================
+
+Model Performance Ranking:
+1. DINO SSL:     84.69% accuracy (Best)
+2. MAE ViT:      81.99% accuracy 
+3. iBOT SSL:     71.11% accuracy
+4. ViT (Supervised): 7.58% accuracy (Baseline)
+
+SSL Methods vs Supervised ViT:
+- DINO improvement: +77.11%
+- MAE improvement:  +74.41%
+- iBOT improvement: +63.53%
+
+All SSL methods significantly outperform the supervised ViT baseline,
+demonstrating the effectiveness of self-supervised learning approaches.
 

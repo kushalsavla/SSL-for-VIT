@@ -25,17 +25,18 @@ echo "Current working directory: $(pwd)"
 ls -l
 
 echo "=========================================="
-echo "Testing ViT and iBOT on Unseen Data..."
+echo "Testing ViT, DINO, and iBOT on Unseen Data..."
 echo "Job ID: $SLURM_JOB_ID"
 echo "Node: $SLURM_NODELIST"
 echo "Time: $(date)"
 echo "=========================================="
 
 # Run test on unseen data
-python test_unseen_data.py \
+python scripts/analysis/test_unseen_data.py \
     --data_path ./data/cifar10_splits/ \
-    --vit_model_path ./vit/best_vit_small_model.pth \
-    --ibot_model_path ./ibot/fine_tune_results/best_fine_tuned_model.pth \
+    --vit_model_path ./models/vit/best_vit_small_model.pth \
+    --dino_model_path ./models/dino/best_dino_fine_tuned_model.pth \
+    --ibot_model_path ./models/ibot/best_fine_tuned_model.pth \
     --batch_size 128 \
     --num_workers 4
 

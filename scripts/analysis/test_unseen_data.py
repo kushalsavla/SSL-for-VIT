@@ -52,6 +52,59 @@ class CIFAR10TestDataset(Dataset):
         
         return img, int(label)
 
+def load_dino_model(model_path, device):
+    """Load the DINO fine-tuned model."""
+    print(f"Loading DINO model from {model_path}")
+    
+    try:
+        # Import DINO vision transformer
+        import sys
+        sys.path.append(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 'external', 'dino', 'dinov2'))
+        from models.vision_transformer import vit_small
+        
+        # Create DINO backbone
+        backbone = vit_small(img_size=32, patch_size=4)
+        
+        # Create fine-tuned model with classifier
+        class FineTunedDinoModel(nn.Module):
+            def __init__(self, backbone, num_classes=10):
+                super().__init__()
+                self.backbone = backbone
+                self.classifier = nn.Linear(384, num_classes)
+            
+            def forward(self, x):
+                features = self.backbone(x)
+                return self.classifier(features)
+        
+        model = FineTunedDinoModel(backbone, num_classes=10)
+        print("✅ Created DINO fine-tuned model")
+        
+    except Exception as e:
+        print(f"❌ Failed to create DINO model: {e}")
+        return None
+    
+    if os.path.exists(model_path):
+        checkpoint = torch.load(model_path, map_location=device)
+        
+        if 'model_state_dict' in checkpoint:
+            state_dict = checkpoint['model_state_dict']
+        else:
+            state_dict = checkpoint
+            
+        try:
+            model.load_state_dict(state_dict)
+            print("✅ Loaded DINO model successfully")
+        except Exception as e:
+            print(f"❌ Failed to load DINO model state dict: {e}")
+            return None
+    else:
+        print(f"⚠️ DINO model path {model_path} not found")
+        return None
+    
+    model.to(device)
+    model.eval()
+    return model
+
 def load_vit_model(model_path, device):
     """Load the supervised ViT model."""
     print(f"Loading ViT model from {model_path}")
@@ -225,11 +278,13 @@ def evaluate_model(model, test_loader, device, model_name):
     }
 
 def main():
-    parser = argparse.ArgumentParser(description='Test ViT and iBOT models on unseen data')
+    parser = argparse.ArgumentParser(description='Test ViT, DINO, and iBOT models on unseen data')
     parser.add_argument('--data_path', type=str, default='./data/cifar10_splits/',
                        help='Path to CIFAR-10 test data')
     parser.add_argument('--vit_model_path', type=str, default='./vit/best_vit_small_model.pth',
                        help='Path to ViT model')
+    parser.add_argument('--dino_model_path', type=str, default='./dino/best_dino_fine_tuned_model.pth',
+                       help='Path to DINO model')
     parser.add_argument('--ibot_model_path', type=str, default='./ibot/fine_tune_results/best_fine_tuned_model.pth',
                        help='Path to iBOT model')
     parser.add_argument('--batch_size', type=int, default=128, help='Batch size')
@@ -260,6 +315,14 @@ def main():
     else:
         print("❌ Could not load ViT model")
     
+    # Test DINO model
+    dino_model = load_dino_model(args.dino_model_path, device)
+    if dino_model is not None:
+        dino_results = evaluate_model(dino_model, test_loader, device, "DINO SSL")
+        results['dino'] = dino_results
+    else:
+        print("❌ Could not load DINO model")
+    
     # Test iBOT model
     ibot_model = load_ibot_model(args.ibot_model_path, device)
     if ibot_model is not None:
@@ -273,17 +336,26 @@ def main():
     print("FINAL TEST RESULTS COMPARISON")
     print("="*60)
     
-    if 'vit' in results and 'ibot' in results:
+    if 'vit' in results and 'dino' in results and 'ibot' in results:
         print(f"{'Model':<20} {'Accuracy':<12} {'Time (s)':<10} {'Throughput':<12}")
         print("-" * 60)
         print(f"{'Supervised ViT':<20} {results['vit']['accuracy']:<12.2f} {results['vit']['test_time']:<10.2f} {results['vit']['throughput']:<12.1f}")
+        print(f"{'DINO SSL':<20} {results['dino']['accuracy']:<12.2f} {results['dino']['test_time']:<10.2f} {results['dino']['throughput']:<12.1f}")
         print(f"{'iBOT SSL':<20} {results['ibot']['accuracy']:<12.2f} {results['ibot']['test_time']:<10.2f} {results['ibot']['throughput']:<12.1f}")
         
-        # Calculate improvement
-        improvement = results['ibot']['accuracy'] - results['vit']['accuracy']
-        print(f"\n📈 iBOT improvement over ViT: {improvement:+.2f}%")
+        # Calculate improvements
+        dino_improvement = results['dino']['accuracy'] - results['vit']['accuracy']
+        ibot_improvement = results['ibot']['accuracy'] - results['vit']['accuracy']
         
-        if improvement > 0:
+        print(f"\n📈 DINO improvement over ViT: {dino_improvement:+.2f}%")
+        print(f"📈 iBOT improvement over ViT: {ibot_improvement:+.2f}%")
+        
+        if dino_improvement > 0:
+            print("✅ DINO SSL outperforms supervised ViT!")
+        else:
+            print("⚠️  Supervised ViT outperforms DINO SSL")
+            
+        if ibot_improvement > 0:
             print("✅ iBOT SSL outperforms supervised ViT!")
         else:
             print("⚠️  Supervised ViT outperforms iBOT SSL")
