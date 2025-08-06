@@ -68,8 +68,12 @@ def load_vit_model(model_path, device):
         # Load checkpoint
         checkpoint = torch.load(model_path, map_location=device)
         
-        # Create a simple ViT model for classification
-        model = vit_small(img_size=32, patch_size=4, num_classes=10)
+        # Create a simple ViT model for classification - use timm instead of DINO's vit_small
+        import timm
+        model = timm.create_model('vit_small_patch16_224', 
+                                patch_size=4, 
+                                num_classes=10, 
+                                img_size=32)
         model.to(device)
         
         # Load state dict
@@ -253,10 +257,10 @@ def create_comprehensive_visualization(image, results, image_path):
         for i, (model_name, (top_probs, top_indices), color) in enumerate(zip(models, results, colors)):
             if i < 3:
                 row = 1
-                col = i + 1
+                col = i
             else:
-                row = 2
-                col = 1
+                row = 1
+                col = 2
             
             y_pos = np.arange(len(top_indices))
             bars = axes[row, col].barh(y_pos, top_probs, color=color, alpha=0.7)
@@ -270,10 +274,11 @@ def create_comprehensive_visualization(image, results, image_path):
             for j, (prob, idx) in enumerate(zip(top_probs, top_indices)):
                 axes[row, col].text(prob + 0.01, j, f'{prob:.3f}', va='center', fontsize=10)
         
-        # Hide the unused subplot
+        # Hide the unused subplots
+        axes[0, 1].axis('off')
         axes[0, 2].axis('off')
-        axes[2, 2].axis('off')
-        axes[2, 3].axis('off')
+        axes[1, 0].axis('off')
+        axes[1, 1].axis('off')
         
         plt.tight_layout()
         
