@@ -53,3 +53,29 @@ weighted avg      0.710     0.711     0.710     10000
 
 --------------------------------------------------
 
+MAE ViT RESULTS:
+Accuracy: 81.99%
+Correct: 8199/10000
+Test time: 13.04 seconds
+Throughput: 766.8 images/second
+
+Classification Report:
+              precision    recall  f1-score   support
+
+    airplane      0.846     0.847     0.847      1000
+  automobile      0.899     0.914     0.906      1000
+        bird      0.728     0.790     0.758      1000
+         cat      0.630     0.670     0.650      1000
+        deer      0.877     0.727     0.795      1000
+         dog      0.757     0.697     0.726      1000
+        frog      0.816     0.895     0.854      1000
+       horse      0.842     0.882     0.861      1000
+        ship      0.913     0.906     0.910      1000
+       truck      0.920     0.871     0.895      1000
+
+    accuracy                          0.820     10000
+   macro avg      0.823     0.820     0.820     10000
+weighted avg      0.823     0.820     0.820     10000
+
+--------------------------------------------------
+
