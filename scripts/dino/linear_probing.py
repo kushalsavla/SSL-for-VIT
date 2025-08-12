@@ -58,31 +58,38 @@ class LinearProbe(nn.Module):
 
 def load_pretrained_model(model_path, device):
     
-    """Load the DINO-pretrained model."""
-    print(f"Loading DINO pretrained model from {model_path}")
-    
-    # Create the same backbone architecture as used in DINO training
-    backbone = vit_small(img_size=32, patch_size=4)
-    print("✅ Using vit_small with img_size=32, patch_size=4")
-    
-    # Load pretrained weights
+    """Load the SSL-pretrained model and freeze it."""
+    print("Loading pretrained model...")
+
+    backbone = timm.create_model('vit_small_patch16_224', patch_size=4, num_classes=0, img_size=32)
+    print(" Created ViT-Small model with patch_size=4 and img_size=32")
+
     if os.path.exists(model_path):
         checkpoint = torch.load(model_path, map_location=device)
-        
-        # Load the backbone weights (excluding the DINO head)
-        backbone_state = {}
-        for key, value in checkpoint.items():
-            # Skip the DINO head parameters (they start with 'head.')
-            if not key.startswith('head.'):
-                backbone_state[key] = value
 
-        print(f"Loaded {len(backbone_state)} backbone weights (excluding head)")
+        if "backbone.backbone.patch_embed.proj.weight" in checkpoint:
 
-        backbone.load_state_dict(backbone_state, strict=False)
-        print(f"✅ Loaded DINO backbone weights from {model_path}")
+            new_state_dict = {}
+            for k, v in checkpoint.items():
+                if k.startswith("backbone."):
+                    new_key = k[len("backbone."):].replace("backbone.", "")  
+                    new_state_dict[new_key] = v
+            backbone.load_state_dict(new_state_dict, strict=False)
+            print(f" Loaded backbone weights from DinoModel checkpoint: {model_path}")
+        else:
+            
+            backbone.load_state_dict(checkpoint, strict=False)
+            print(f" Loaded model weights directly from: {model_path}")
+
     else:
-        print(f"⚠️ Model path {model_path} not found, using random weights")
-    
+        print(f" Model path not found: {model_path}, using random weights")
+
+    # Freeze the backbone
+    backbone.to(device)
+    backbone.eval()
+    for param in backbone.parameters():
+        param.requires_grad = False
+
     return backbone
 
 
